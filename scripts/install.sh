@@ -4,5 +4,5 @@
 eval "apt update"
 eval "apt install -y ffmpeg"
 
-# image magik
+# imagemagick
 eval "apt install -y imagemagick"
