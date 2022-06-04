@@ -4,7 +4,7 @@
 
 FROM ubuntu:22.04
 
-ADD ["install.sh", "frames.sh", "convert.sh", "run.sh", "scripts/"]
+ADD ["install.sh", "frames.sh", "convert.sh", "resize.sh",  "make_thumbnail.sh", "scripts/"]
 RUN chmod -R +x scripts/
 RUN scripts/install.sh
 
