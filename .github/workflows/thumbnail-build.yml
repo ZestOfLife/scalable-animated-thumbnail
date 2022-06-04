@@ -30,7 +30,7 @@ jobs:
       run: echo ${{ steps.vars.outputs.sha_short }}
     - name: Build docker image
       run: |
-        cd backend && \
+        cd scripts && \
         docker build . --file Dockerfile \
         --tag ghcr.io/${{ env.BASE_IMG_NAME }}/thumbnail_maker:${{ steps.vars.outputs.sha_short }} \
         --tag ghcr.io/${{ env.BASE_IMG_NAME }}/thumbnail_maker:latest
