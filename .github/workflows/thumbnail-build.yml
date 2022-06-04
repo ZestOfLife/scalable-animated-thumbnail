@@ -1,6 +1,7 @@
 name: Build Thumbnail Maker Image
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
     paths: [ scripts/** ]
