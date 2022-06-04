@@ -12,5 +12,4 @@ RUN scripts/install.sh
 # Execute via make_thumbnail command
 #
 
-ENTRYPOINT ["scripts/run.sh"]
-CMD ["sample.mp4", "output.gif"]
+CMD ["scripts/make_thumbnail.sh", "sample.mp4", "output.gif"]
