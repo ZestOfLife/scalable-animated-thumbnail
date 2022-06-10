@@ -1,9 +1,9 @@
 package domains
 
 type VideoFile struct {
-	name              string
-	frames            int8
-	extractedProgress int8
-	resized           int8
-	compiled          int8
+	name      string
+	expected  int8
+	extracted int8
+	resized   int8
+	compiled  int8
 }
