@@ -50,7 +50,6 @@ func streamReader(client *redis.Client) {
 				FPS := fmt.Sprintf("%d", val["FPS"])
 				DurationAt := fmt.Sprintf("%d", val["DurationAt"])
 				go queueJob(wg2, send_to, BucketID, VideoName, ExpectedFrames, FPS, DurationAt)
-				
 			}
 			client.XAck("buckets", "job-observer", msgID)
 		}
