@@ -9,7 +9,7 @@ import (
 	"github.com/go-redis/redis/v9"
 )
 
-func JobHandler(w http.ResponseWriter, req *http.Request) {
+func CompileSuccessHandler(w http.ResponseWriter, req *http.Request) {
 	var cmd LogCompileSuccess
 	switch req.Method {
 	case "POST":
