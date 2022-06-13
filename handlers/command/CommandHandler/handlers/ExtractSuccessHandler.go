@@ -10,7 +10,7 @@ import (
 )
 
 func JobHandler(w http.ResponseWriter, req *http.Request) {
-	var cmd LogVideoJob
+	var cmd LogExtractSuccess
 	switch req.Method {
 	case "POST":
 		decoder := json.NewDecoder(req.Body)
@@ -40,12 +40,11 @@ func JobHandler(w http.ResponseWriter, req *http.Request) {
 		MaxLenApprox: 0,
 		ID:           "",
 		Values: map[string]interface{}{
-			"Event":          "NewRequest",
+			"Event":          "FrameExtracted",
 			"BucketID":       cmd.BucketID,
 			"VideoName":      cmd.VideoName,
+			"FileName":       cmd.FileName,
 			"ExpectedFrames": cmd.ExpectedFrames,
-			"FPS":            cmd.FPS,
-			"DurationAt":     cmd.DurationAt,
 		},
 	}).Err()
 	if err != nil {
