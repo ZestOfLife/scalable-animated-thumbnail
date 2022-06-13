@@ -10,7 +10,7 @@ import (
 )
 
 func JobHandler(w http.ResponseWriter, req *http.Request) {
-	var cmd LogResizeSuccess
+	var cmd LogCompileFailure
 	switch req.Method {
 	case "POST":
 		decoder := json.NewDecoder(req.Body)
@@ -40,7 +40,7 @@ func JobHandler(w http.ResponseWriter, req *http.Request) {
 		MaxLenApprox: 0,
 		ID:           "",
 		Values: map[string]interface{}{
-			"Event":          "FrameResized",
+			"Event":          "FrameCompileFailure",
 			"BucketID":       cmd.BucketID,
 			"VideoName":      cmd.VideoName,
 			"FileName":       cmd.FileName,
