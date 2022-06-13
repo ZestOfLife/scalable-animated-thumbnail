@@ -2,41 +2,39 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
-	"sync"
+	"fmt"
 	"log"
+	"sync"
 
 	"github.com/go-redis/redis/v9"
 	"github.com/rs/xid"
 )
 
-type empty {}
-
 func streamReader(client *redis.Client) {
 	for {
 		consumerId := xid.New().String()
 		res, err := client.XRead(&redis.XReadArgs{
-			Group: "job-observer",
+			Group:    "job-observer",
 			Consumer: consumerId,
-			Streams: []string{"buckets", ">"},
-			Block:   0,
-			NoAck: false,
+			Streams:  []string{"buckets", ">"},
+			Block:    0,
+			NoAck:    false,
 		}).Result()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		send_to := redis.NewClient(&redis.Options{
-			Addr: "localhost:6379",
+			Addr:     "localhost:6379",
 			Password: "",
-			DB:   0,
+			DB:       0,
 		})
 		_, conn_err := client.Ping().Result()
 		if conn_err != nil {
 			log.Fatal("Unbale to connect to queue", err)
 		}
-		
+
 		var wg2 sync.WaitGroup
 		wg2.Add(len(res[0].Messages))
 		for i := 0; i < len(res[0].Messages); i++ {
