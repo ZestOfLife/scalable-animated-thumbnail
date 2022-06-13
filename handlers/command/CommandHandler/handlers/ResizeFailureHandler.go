@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"CommandHandler/commands"
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 )
 
 func ResizeFailureHandler(w http.ResponseWriter, req *http.Request) {
-	var cmd LogResizeFailure
+	var cmd commands.LogResizeFailure
 	switch req.Method {
 	case "POST":
 		decoder := json.NewDecoder(req.Body)
@@ -24,21 +25,21 @@ func ResizeFailureHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	cntx := context.Background()
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
-	_, err := client.Ping().Result()
+	_, err := client.Ping(cntx).Result()
 	if err != nil {
-		log.Fatal("Unbale to connect to event store", err)
+		log.Fatal("Unable to connect to event store", err)
 	}
 
-	err := client.XAdd(&redis.XAddArgs{
-		Stream:       "buckets",
-		MaxLen:       0,
-		MaxLenApprox: 0,
-		ID:           "",
+	client.XAdd(cntx, &redis.XAddArgs{
+		Stream: "buckets",
+		MaxLen: 0,
+		ID:     "",
 		Values: map[string]interface{}{
 			"Event":          "FrameResizeFailure",
 			"BucketID":       cmd.BucketID,
@@ -47,8 +48,5 @@ func ResizeFailureHandler(w http.ResponseWriter, req *http.Request) {
 			"ExpectedFrames": cmd.ExpectedFrames,
 		},
 	}).Err()
-	if err != nil {
-		log.Fatal(err)
-	}
 	client.Close()
 }

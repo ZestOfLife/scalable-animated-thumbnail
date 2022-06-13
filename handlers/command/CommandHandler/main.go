@@ -7,13 +7,16 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/reportnewjob", JobHandler)
-	http.HandleFunc("/reportextract", ExtractSuccessHandler)
-	http.HandleFunc("/reportresize", ResizeSuccessHandler)
-	http.HandleFunc("/reportcompile", CompileSuccessHandler)
-	http.HandleFunc("/reportextractfailure", ExtractFailureHandler)
-	http.HandleFunc("/reportresizefailure", ResizeFailureHandler)
-	http.HandleFunc("/reportcompilefailure", CompileFailureHandler)
+	log.Println("Starting up Command Handler")
 
+	http.HandleFunc("/reportnewjob", handlers.JobHandler)
+	http.HandleFunc("/reportextract", handlers.ExtractSuccessHandler)
+	http.HandleFunc("/reportresize", handlers.ResizeSuccessHandler)
+	http.HandleFunc("/reportcompile", handlers.CompileSuccessHandler)
+	http.HandleFunc("/reportextractfailure", handlers.ExtractFailureHandler)
+	http.HandleFunc("/reportresizefailure", handlers.ResizeFailureHandler)
+	http.HandleFunc("/reportcompilefailure", handlers.CompileFailureHandler)
+
+	log.Println("Listening on port 8080")
 	http.ListenAndServe(":8080", nil)
 }

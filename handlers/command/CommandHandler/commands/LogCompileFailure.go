@@ -2,6 +2,7 @@ package commands
 
 type LogCompileFailure struct {
 	BucketType
-	VideoName string
-	FileName  string
+	VideoName      string
+	FileName       string
+	ExpectedFrames int
 }
