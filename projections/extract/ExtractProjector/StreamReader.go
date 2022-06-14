@@ -2,9 +2,10 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"sync"
 
 	"github.com/go-redis/redis/v9"
@@ -13,8 +14,9 @@ import (
 
 func streamReader(client *redis.Client) {
 	for {
+		cntx := context.Background()
 		consumerId := xid.New().String()
-		res, err := client.XRead(&redis.XReadArgs{
+		res, err := client.XReadGroup(cntx, &redis.XReadGroupArgs{
 			Group:    "job-observer",
 			Consumer: consumerId,
 			Streams:  []string{"buckets", ">"},
@@ -30,7 +32,7 @@ func streamReader(client *redis.Client) {
 			Password: "",
 			DB:       0,
 		})
-		_, conn_err := client.Ping().Result()
+		_, conn_err := client.Ping(cntx).Result()
 		if conn_err != nil {
 			log.Fatal("Unbale to connect to queue", err)
 		}
@@ -41,17 +43,23 @@ func streamReader(client *redis.Client) {
 			msgID := res[0].Messages[i].ID
 			val := res[0].Messages[i].Values
 			Event := fmt.Sprintf("%v", val["Event"])
-			if event == "NewRequest" {
-				BucketID := fmt.Sprintf("%d", val["BucketID"])
+			if Event == "NewRequest" {
+				BucketID, _ := strconv.Atoi(fmt.Sprintf("%v", val["BucketID"]))
 				VideoName := fmt.Sprintf("%v", val["VideoName"])
-				ExpectedFrames := fmt.Sprintf("%d", val["ExpectedFrames"])
-				FPS := fmt.Sprintf("%d", val["FPS"])
-				DurationAt := fmt.Sprintf("%d", val["DurationAt"])
-				go queueJob(wg2, send_to, BucketID, VideoName, ExpectedFrames, FPS, DurationAt)
+				ExpectedFrames, _ := strconv.Atoi(fmt.Sprintf("%v", val["ExpectedFrames"]))
+				FPS, _ := strconv.Atoi(fmt.Sprintf("%v", val["FPS"]))
+				DurationAt, _ := strconv.Atoi(fmt.Sprintf("%v", val["DurationAt"]))
+				go queueJob(&wg2, send_to, BucketID, VideoName, ExpectedFrames, FPS, DurationAt)
+			} else if Event == "ExtractionFailure" {
+				BucketID, _ := strconv.Atoi(fmt.Sprintf("%v", val["BucketID"]))
+				VideoName := fmt.Sprintf("%v", val["VideoName"])
+				FileName := fmt.Sprint("%v", val["FileName"])
+				Timestamp, _ := strconv.ParseFloat(fmt.Sprintf("%v", val["Timestamp"]), 32)
+				go redoJob(&wg2, send_to, BucketID, VideoName, float32(Timestamp), FileName)
 			} else {
 				wg2.Done()
 			}
-			client.XAck("buckets", "job-observer", msgID)
+			client.XAck(cntx, "buckets", "job-observer", msgID)
 		}
 		wg2.Wait()
 		send_to.Close()

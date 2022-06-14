@@ -1,4 +1,4 @@
-module github.com/cs-muic/scalable-p2-scalable-t3-datrix
+module ExtractProjector
 
 go 1.18
 
