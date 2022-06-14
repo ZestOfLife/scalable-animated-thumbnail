@@ -49,4 +49,5 @@ func ResizeSuccessHandler(w http.ResponseWriter, req *http.Request) {
 		},
 	}).Err()
 	client.Close()
+	w.WriteHeader(200)
 }

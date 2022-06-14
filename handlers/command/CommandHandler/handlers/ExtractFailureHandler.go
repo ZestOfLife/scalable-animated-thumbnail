@@ -49,4 +49,5 @@ func ExtractFailureHandler(w http.ResponseWriter, req *http.Request) {
 		},
 	}).Err()
 	client.Close()
+	w.WriteHeader(200)
 }
