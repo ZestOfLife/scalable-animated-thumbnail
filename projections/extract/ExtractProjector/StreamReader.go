@@ -55,7 +55,8 @@ func streamReader(client *redis.Client) {
 				VideoName := fmt.Sprintf("%v", val["VideoName"])
 				FileName := fmt.Sprint("%v", val["FileName"])
 				Timestamp, _ := strconv.ParseFloat(fmt.Sprintf("%v", val["Timestamp"]), 32)
-				go redoJob(&wg2, send_to, BucketID, VideoName, float32(Timestamp), FileName)
+				ExpectedFrames, _ := strconv.Atoi(fmt.Sprintf("%v", val["ExpectedFrames"]))
+				go redoJob(&wg2, send_to, BucketID, VideoName, float32(Timestamp), FileName, ExpectedFrames)
 			} else {
 				wg2.Done()
 			}
