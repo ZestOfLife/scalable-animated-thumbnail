@@ -24,7 +24,7 @@ func streamReader(client *redis.Client) {
 		})
 		_, conn_err := client.Ping(cntx).Result()
 		if conn_err != nil {
-			log.Fatal("Unbale to connect to queue", err)
+			log.Fatal("Unbale to connect to queue", conn_err)
 		}
 
 		res, err := client.XReadGroup(cntx, &redis.XReadGroupArgs{
