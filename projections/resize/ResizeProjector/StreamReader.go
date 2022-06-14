@@ -16,16 +16,6 @@ func streamReader(client *redis.Client) {
 	for {
 		cntx := context.Background()
 		consumerId := xid.New().String()
-		res, err := client.XReadGroup(cntx, &redis.XReadGroupArgs{
-			Group:    "extract-observer",
-			Consumer: consumerId,
-			Streams:  []string{"buckets", ">"},
-			Block:    0,
-			NoAck:    false,
-		}).Result()
-		if err != nil {
-			log.Fatal(err)
-		}
 
 		send_to := redis.NewClient(&redis.Options{
 			Addr:     "localhost:6379",
@@ -35,6 +25,17 @@ func streamReader(client *redis.Client) {
 		_, conn_err := client.Ping(cntx).Result()
 		if conn_err != nil {
 			log.Fatal("Unbale to connect to queue", err)
+		}
+
+		res, err := client.XReadGroup(cntx, &redis.XReadGroupArgs{
+			Group:    "extract-observer",
+			Consumer: consumerId,
+			Streams:  []string{"buckets", ">"},
+			Block:    0,
+			NoAck:    false,
+		}).Result()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		var wg2 sync.WaitGroup
