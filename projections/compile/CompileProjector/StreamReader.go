@@ -58,7 +58,7 @@ func streamReader(client *redis.Client) {
 			} else {
 				wg2.Done()
 			}
-			client.XAck(cntx, "buckets", "job-observer", msgID)
+			client.XAck(cntx, "buckets", "resize-observer", msgID)
 		}
 		wg2.Wait()
 		send_to.Close()
