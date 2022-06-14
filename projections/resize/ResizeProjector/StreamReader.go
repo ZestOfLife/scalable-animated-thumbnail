@@ -17,7 +17,7 @@ func streamReader(client *redis.Client) {
 		cntx := context.Background()
 		consumerId := xid.New().String()
 		res, err := client.XReadGroup(cntx, &redis.XReadGroupArgs{
-			Group:    "job-observer",
+			Group:    "extract-observer",
 			Consumer: consumerId,
 			Streams:  []string{"buckets", ">"},
 			Block:    0,
@@ -43,20 +43,18 @@ func streamReader(client *redis.Client) {
 			msgID := res[0].Messages[i].ID
 			val := res[0].Messages[i].Values
 			Event := fmt.Sprintf("%v", val["Event"])
-			if Event == "NewRequest" {
-				BucketID, _ := strconv.Atoi(fmt.Sprintf("%v", val["BucketID"]))
-				VideoName := fmt.Sprintf("%v", val["VideoName"])
-				ExpectedFrames, _ := strconv.Atoi(fmt.Sprintf("%v", val["ExpectedFrames"]))
-				FPS, _ := strconv.Atoi(fmt.Sprintf("%v", val["FPS"]))
-				DurationAt, _ := strconv.Atoi(fmt.Sprintf("%v", val["DurationAt"]))
-				go queueJob(&wg2, send_to, BucketID, VideoName, ExpectedFrames, FPS, DurationAt)
-			} else if Event == "ExtractionFailure" {
+			if Event == "FrameExtracted" {
 				BucketID, _ := strconv.Atoi(fmt.Sprintf("%v", val["BucketID"]))
 				VideoName := fmt.Sprintf("%v", val["VideoName"])
 				FileName := fmt.Sprintf("%v", val["FileName"])
-				Timestamp, _ := strconv.ParseFloat(fmt.Sprintf("%v", val["Timestamp"]), 32)
 				ExpectedFrames, _ := strconv.Atoi(fmt.Sprintf("%v", val["ExpectedFrames"]))
-				go redoJob(&wg2, send_to, BucketID, VideoName, float32(Timestamp), FileName, ExpectedFrames)
+				go queueJob(&wg2, send_to, BucketID, VideoName, FileName, ExpectedFrames)
+			} else if Event == "ResizeFailure" {
+				BucketID, _ := strconv.Atoi(fmt.Sprintf("%v", val["BucketID"]))
+				VideoName := fmt.Sprintf("%v", val["VideoName"])
+				FileName := fmt.Sprint("%v", val["FileName"])
+				ExpectedFrames, _ := strconv.Atoi(fmt.Sprintf("%v", val["ExpectedFrames"]))
+				go redoJob(&wg2, send_to, BucketID, VideoName, FileName, ExpectedFrames)
 			} else {
 				wg2.Done()
 			}
