@@ -1,7 +1,7 @@
 package commands
 
 type LogExtractFailure struct {
-	BucketType
+	BucketID       int
 	VideoName      string
 	FileName       string
 	Timestamp      float32
