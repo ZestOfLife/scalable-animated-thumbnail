@@ -12,7 +12,7 @@ import (
 
 func doMinioStartup() *minio.Client {
 	cntx := context.Background()
-	endpoint := "minio-svc"
+	endpoint := "minio-svc:9000"
 	accessKeyID := "minio"
 	secretAccessKey := "minio_pass"
 	useSSL := false
