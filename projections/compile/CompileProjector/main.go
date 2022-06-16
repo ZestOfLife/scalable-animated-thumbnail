@@ -22,7 +22,7 @@ func main() {
 	}
 	log.Println("Connected to event store")
 
-	err = client.XGroupCreate(cntx, "buckets", "resize-observer", "0").Err()
+	err = client.XGroupCreateMkStream(cntx, "buckets", "resize-observer", "0").Err()
 	if err != nil {
 		log.Println(err) // Possible that it was created beforehand
 	}

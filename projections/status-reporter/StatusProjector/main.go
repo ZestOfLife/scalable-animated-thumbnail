@@ -40,14 +40,14 @@ func main() {
 	}
 	log.Println("Connected to event store")
 
-	err = client.XGroupCreate(cntx, "buckets", "observer", "0").Err()
+	err = client.XGroupCreateMkStream(cntx, "buckets", "observer", "0").Err()
 	if err != nil {
 		log.Println(err) // Possible that it was created beforehand
 	}
 
 	if res.RowsAffected < 1 {
 		client.XGroupDestroy(cntx, "buckets", "observer")
-		err = client.XGroupCreate(cntx, "buckets", "observer", "0").Err()
+		err = client.XGroupCreateMkStream(cntx, "buckets", "observer", "0").Err()
 		if err != nil {
 			log.Println(err) // Possible that it was created beforehand
 		}
