@@ -15,7 +15,7 @@ func doMinioStartup() *minio.Client {
 	endpoint := "minio-svc"
 	accessKeyID := "minio"
 	secretAccessKey := "minio_pass"
-	useSSL := true
+	useSSL := false
 
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
