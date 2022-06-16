@@ -10,6 +10,7 @@ import (
 func DoDeadMessages() {
 	queue.DeadMutex.Lock()
 	defer queue.DeadMutex.Unlock()
+	count := queue.GetDeadLen()
 
 	for i := 0; i < count; i++ {
 		msg := queue.PopDeadQueue()
