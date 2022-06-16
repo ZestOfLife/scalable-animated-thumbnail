@@ -51,7 +51,7 @@ func streamReader(client *redis.Client) {
 				FPS, _ := strconv.Atoi(fmt.Sprintf("%v", val["FPS"]))
 				DurationAt, _ := strconv.Atoi(fmt.Sprintf("%v", val["DurationAt"]))
 				go queueJob(&wg2, send_to, BucketID, VideoName, ExpectedFrames, FPS, DurationAt)
-			} else if Event == "ExtractionFailure" {
+			} else if Event == "FrameExtractionFailure" {
 				BucketID, _ := strconv.Atoi(fmt.Sprintf("%v", val["BucketID"]))
 				VideoName := fmt.Sprintf("%v", val["VideoName"])
 				FileName := fmt.Sprintf("%v", val["FileName"])

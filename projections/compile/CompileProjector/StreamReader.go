@@ -50,7 +50,7 @@ func streamReader(client *redis.Client) {
 				FileName := fmt.Sprintf("%v", val["FileName"])
 				ExpectedFrames, _ := strconv.Atoi(fmt.Sprintf("%v", val["ExpectedFrames"]))
 				go queueJob(&wg2, send_to, BucketID, VideoName, FileName, ExpectedFrames)
-			} else if Event == "CompileFailure" {
+			} else if Event == "FrameCompileFailure" {
 				BucketID, _ := strconv.Atoi(fmt.Sprintf("%v", val["BucketID"]))
 				VideoName := fmt.Sprintf("%v", val["VideoName"])
 				FileName := fmt.Sprint("%v", val["FileName"])
