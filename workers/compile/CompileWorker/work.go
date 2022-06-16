@@ -69,85 +69,83 @@ func work(client *redis.Client, minioClient *minio.Client) {
 			log.Fatal("Unable to connect to queue: ", err_c)
 		}
 
-		for i := 0; i < len(res); i++ {
-			var job JobCertificate
-			err2 := json.Unmarshal([]byte(res[i]), &job)
-			if err2 != nil {
-				log.Fatal(err2)
-			}
+		var job JobCertificate
+		err2 := json.Unmarshal([]byte(res[1]), &job)
+		if err2 != nil {
+			log.Fatal(err2)
+		}
 
-			path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
-			err3 := os.MkdirAll(path, os.ModePerm)
-			if err3 != nil {
-				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				continue
-			}
+		path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
+		err3 := os.MkdirAll(path, os.ModePerm)
+		if err3 != nil {
+			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+			continue
+		}
 
-			err4 := downloader(minioClient, job.BucketID, job.VideoName, job.FileName)
-			if err4 != nil {
-				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				continue
-			}
+		err4 := downloader(minioClient, job.BucketID, job.VideoName, job.FileName)
+		if err4 != nil {
+			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+			continue
+		}
 
-			str_bucket_id := fmt.Sprintf("%d", job.BucketID)
+		str_bucket_id := fmt.Sprintf("%d", job.BucketID)
 
-			_, not_found := client2.Get(cntx, str_bucket_id+"-"+job.VideoName).Result()
-			if not_found == redis.Nil {
-				client2.BRPop(cntx, 0, str_bucket_id+"-"+job.VideoName+"-wait").Result()
-			} else if not_found != nil {
-				log.Panic(not_found)
-			}
-			client2.Set(cntx, str_bucket_id+"-"+job.VideoName, "1", 0)
+		_, not_found := client2.Get(cntx, str_bucket_id+"-"+job.VideoName).Result()
+		if not_found == redis.Nil {
+			client2.BRPop(cntx, 0, str_bucket_id+"-"+job.VideoName+"-wait").Result()
+		} else if not_found != nil {
+			log.Panic(not_found)
+		}
+		client2.Set(cntx, str_bucket_id+"-"+job.VideoName, "1", 0)
 
-			re := regexp.MustCompile("[0-9]+")
-			val := re.FindAllString(job.FileName, -1)[0]
+		re := regexp.MustCompile("[0-9]+")
+		val := re.FindAllString(job.FileName, -1)[0]
 
-			errr := client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-done", val).Err()
-			if errr != nil {
-				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
-				client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
-				continue
-			}
-			getList, _ := client2.Sort(cntx, str_bucket_id+"-"+job.VideoName+"-done", &redis.Sort{}).Result()
-			int_val, _ := strconv.Atoi(val)
-			indx, _ := binarySearch(getList, int_val)
-
-			fileName := fileNameWithoutExtSliceNotation(job.VideoName) + ".gif"
-
-			var cmd *exec.Cmd
-			if _, os_err := os.Stat("./" + str_bucket_id + "/" + fileName); errors.Is(os_err, os.ErrNotExist) {
-				cmd = exec.Command("convert", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName)
-			} else if val == getList[0] {
-				cmd = exec.Command("convert", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName, "./"+str_bucket_id+"/"+fileName)
-			} else if val == getList[len(getList)-1] {
-				exec.Command("convert", "./"+str_bucket_id+"/"+fileName, "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName)
-			} else {
-				exec.Command("convert", "'./"+str_bucket_id+"/"+fileName+"[0"+fmt.Sprintf("%d", indx-1)+"]'", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "'./"+str_bucket_id+"/"+fileName+"["+fmt.Sprintf("%d", indx)+"--1]'", "./"+str_bucket_id+"/"+fileName)
-			}
-
-			err5 := cmd.Run()
-			if err5 != nil {
-				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
-				client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
-				continue
-			}
-
-			if len(getList) == job.ExpectedFrames {
-				err6 := uploader(minioClient, job.BucketID, job.FileName)
-				if err6 != nil {
-					go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-					client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
-					client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
-					continue
-				}
-			}
-
-			go senders.CompileSuccess(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+		errr := client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-done", val).Err()
+		if errr != nil {
+			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
 			client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
+			continue
 		}
+		getList, _ := client2.Sort(cntx, str_bucket_id+"-"+job.VideoName+"-done", &redis.Sort{}).Result()
+		int_val, _ := strconv.Atoi(val)
+		indx, _ := binarySearch(getList, int_val)
+
+		fileName := fileNameWithoutExtSliceNotation(job.VideoName) + ".gif"
+
+		var cmd *exec.Cmd
+		if _, os_err := os.Stat("./" + str_bucket_id + "/" + fileName); errors.Is(os_err, os.ErrNotExist) {
+			cmd = exec.Command("convert", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName)
+		} else if val == getList[0] {
+			cmd = exec.Command("convert", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName, "./"+str_bucket_id+"/"+fileName)
+		} else if val == getList[len(getList)-1] {
+			exec.Command("convert", "./"+str_bucket_id+"/"+fileName, "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName)
+		} else {
+			exec.Command("convert", "'./"+str_bucket_id+"/"+fileName+"[0"+fmt.Sprintf("%d", indx-1)+"]'", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "'./"+str_bucket_id+"/"+fileName+"["+fmt.Sprintf("%d", indx)+"--1]'", "./"+str_bucket_id+"/"+fileName)
+		}
+
+		err5 := cmd.Run()
+		if err5 != nil {
+			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
+			client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
+			continue
+		}
+
+		if len(getList) == job.ExpectedFrames {
+			err6 := uploader(minioClient, job.BucketID, job.FileName)
+			if err6 != nil {
+				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+				client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
+				client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
+				continue
+			}
+		}
+
+		go senders.CompileSuccess(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+		client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
+		client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
 		client2.Close()
 	}
 }

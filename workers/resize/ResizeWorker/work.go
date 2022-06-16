@@ -31,39 +31,37 @@ func work(client *redis.Client, minioClient *minio.Client) {
 			log.Fatal(err)
 		}
 
-		for i := 0; i < len(res); i++ {
-			var job JobCertificate
-			err2 := json.Unmarshal([]byte(res[i]), &job)
-			if err2 != nil {
-				log.Fatal(err2)
-			}
-
-			path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
-			err3 := os.MkdirAll(path, os.ModePerm)
-			if err3 != nil {
-				go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				continue
-			}
-
-			err4 := downloader(minioClient, job.BucketID, job.VideoName, job.FileName)
-			if err4 != nil {
-				go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				continue
-			}
-
-			cmd := exec.Command("mogrify", path+"/"+job.FileName, "-resize", "720x540", path+"/"+job.FileName)
-			err5 := cmd.Run()
-			if err5 != nil {
-				go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				continue
-			}
-
-			err6 := uploader(minioClient, job.BucketID, job.VideoName, job.FileName)
-			if err6 != nil {
-				go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
-				continue
-			}
-			go senders.ResizeSuccess(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+		var job JobCertificate
+		err2 := json.Unmarshal([]byte(res[1]), &job)
+		if err2 != nil {
+			log.Fatal(err2)
 		}
+
+		path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
+		err3 := os.MkdirAll(path, os.ModePerm)
+		if err3 != nil {
+			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+			continue
+		}
+
+		err4 := downloader(minioClient, job.BucketID, job.VideoName, job.FileName)
+		if err4 != nil {
+			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+			continue
+		}
+
+		cmd := exec.Command("mogrify", path+"/"+job.FileName, "-resize", "720x540", path+"/"+job.FileName)
+		err5 := cmd.Run()
+		if err5 != nil {
+			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+			continue
+		}
+
+		err6 := uploader(minioClient, job.BucketID, job.VideoName, job.FileName)
+		if err6 != nil {
+			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+			continue
+		}
+		go senders.ResizeSuccess(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 	}
 }
