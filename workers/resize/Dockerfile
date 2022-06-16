@@ -1,7 +1,7 @@
 FROM golang:1.18
 
 RUN apt-get update
-RUN apt-get install imagemagick
+RUN apt-get -y install imagemagick
 
 ADD ./ExtractWorker /app
 WORKDIR /app
