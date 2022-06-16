@@ -8,9 +8,9 @@ import (
 )
 
 func DoDeadMessages() {
-	queue.DeadWG.Wait()
-	queue.DeadWG.Add(1)
-	count := queue.GetDeadLen()
+	queue.DeadMutex.Lock()
+	defer queue.DeadMutex.Unlock()
+
 	for i := 0; i < count; i++ {
 		msg := queue.PopDeadQueue()
 		responseBody := bytes.NewBuffer(msg.Message)
@@ -27,5 +27,4 @@ func DoDeadMessages() {
 			return
 		}
 	}
-	queue.DeadWG.Done()
 }

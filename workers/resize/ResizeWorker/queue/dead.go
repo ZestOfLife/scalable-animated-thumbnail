@@ -5,7 +5,7 @@ import (
 )
 
 var DEAD_MESSAGE_QUEUE = make([]DeadType, 0)
-var DeadWG sync.WaitGroup
+var DeadMutex sync.Mutex
 
 func PushDeadQueue(message DeadType) {
 	DEAD_MESSAGE_QUEUE = append(DEAD_MESSAGE_QUEUE, message)

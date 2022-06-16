@@ -1,7 +1,7 @@
 package senders
 
 import (
-	"ResizeWorker/queue"
+	"CompileWorker/queue"
 	"bytes"
 	"io/ioutil"
 	"net/http"

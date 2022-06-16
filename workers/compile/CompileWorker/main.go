@@ -25,16 +25,16 @@ func doMinioStartup() *minio.Client {
 		log.Fatal(err)
 	}
 
-	err = minioClient.MakeBucket(cntx, "resized", minio.MakeBucketOptions{})
+	err = minioClient.MakeBucket(cntx, "gifs", minio.MakeBucketOptions{})
 	if err != nil {
-		exists, errBucketExists := minioClient.BucketExists(cntx, "resized")
+		exists, errBucketExists := minioClient.BucketExists(cntx, "gifs")
 		if errBucketExists == nil && exists {
-			log.Printf("We already own %s\n", "resized")
+			log.Printf("We already own %s\n", "gifs")
 		} else {
 			log.Fatalln(err)
 		}
 	} else {
-		log.Printf("Successfully created %s\n", "resized")
+		log.Printf("Successfully created %s\n", "gifs")
 	}
 	return minioClient
 }
@@ -42,7 +42,7 @@ func doMinioStartup() *minio.Client {
 func main() {
 	cntx := context.Background()
 	client := redis.NewClient(&redis.Options{
-		Addr:     "resize-projector:6379",
+		Addr:     "compile-projector:6379",
 		Password: "",
 		DB:       0,
 	})
