@@ -141,8 +141,8 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		if err5 != nil {
 			log.Println("Error 5:")
 			log.Println(err5)
-			log.Println(out)
-			log.Println(stderr)
+			log.Println(out.String())
+			log.Println(stderr.String())
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
 			client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)

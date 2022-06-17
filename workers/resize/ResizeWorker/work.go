@@ -64,8 +64,8 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		if err5 != nil {
 			log.Println("Error 5:")
 			log.Println(err5)
-			log.Println(out)
-			log.Println(stderr)
+			log.Println(out.String())
+			log.Println(stderr.String())
 			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
 		}
