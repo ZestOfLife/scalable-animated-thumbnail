@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"strconv"
 
@@ -75,7 +74,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 			log.Fatal(err2)
 		}
 
-		path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
+		path := fmt.Sprintf("./%v/%v", fmt.Sprintf("%d", job.BucketID), job.VideoName)
 		err3 := os.MkdirAll(path, os.ModePerm)
 		if err3 != nil {
 			log.Println("Error 3:")
