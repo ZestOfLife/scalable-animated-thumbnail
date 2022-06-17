@@ -3,6 +3,7 @@ package main
 import (
 	"ResizeWorker/queue"
 	"ResizeWorker/senders"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -55,9 +56,16 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		cmd := exec.Command("mogrify", path+"/"+job.FileName, "-resize", "720x540", path+"/"+job.FileName)
 		err5 := cmd.Run()
+		var out bytes.Buffer
+		var stderr bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
+
 		if err5 != nil {
 			log.Println("Error 5:")
 			log.Println(err5)
+			log.Println(out)
+			log.Println(stderr)
 			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
 		}

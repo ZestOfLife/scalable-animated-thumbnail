@@ -3,6 +3,7 @@ package main
 import (
 	"CompileWorker/queue"
 	"CompileWorker/senders"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -132,9 +133,16 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		}
 
 		err5 := cmd.Run()
+		var out bytes.Buffer
+		var stderr bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
+
 		if err5 != nil {
 			log.Println("Error 5:")
 			log.Println(err5)
+			log.Println(out)
+			log.Println(stderr)
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
 			client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)

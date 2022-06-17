@@ -3,6 +3,7 @@ package main
 import (
 	"ExtractWorker/queue"
 	"ExtractWorker/senders"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -57,9 +58,15 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		cmd := exec.Command("ffmpeg", "-ss", timeAt, "-i", path+"/"+job.VideoName, "-frames:v", "1", "-q:v", "2", path+"/"+job.FileName)
 		err5 := cmd.Run()
+		var out bytes.Buffer
+		var stderr bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
 		if err5 != nil {
 			log.Println("Error 5:")
 			log.Println(err5)
+			log.Println(out)
+			log.Println(stderr)
 			go senders.ExtractFailure(job.BucketID, job.VideoName, job.FileName, job.Timestamp, job.ExpectedFrames)
 			continue
 		}
