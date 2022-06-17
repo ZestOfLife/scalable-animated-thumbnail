@@ -19,6 +19,6 @@ func downloader(minioClient *minio.Client, BucketID int, VideoName string, FileN
 	cntx := context.Background()
 	filePath := fmt.Sprintf("%v/%v/%v", fmt.Sprintf("%d", BucketID), VideoName, FileName)
 
-	err := minioClient.FGetObject(cntx, "resize", filePath, "./"+filePath, minio.GetObjectOptions{})
+	err := minioClient.FGetObject(cntx, "resized", filePath, "./"+filePath, minio.GetObjectOptions{})
 	return err
 }

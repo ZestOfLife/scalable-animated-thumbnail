@@ -129,7 +129,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		} else if val == getList[len(getList)-1] {
 			exec.Command("convert", "./"+str_bucket_id+"/"+fileName, "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName)
 		} else {
-			exec.Command("convert", "'./"+str_bucket_id+"/"+fileName+"[0"+fmt.Sprintf("%d", indx-1)+"]'", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "'./"+str_bucket_id+"/"+fileName+"["+fmt.Sprintf("%d", indx)+"--1]'", "./"+str_bucket_id+"/"+fileName)
+			exec.Command("convert", "./"+str_bucket_id+"/"+fileName+"[0-"+fmt.Sprintf("%d", indx-1)+"]", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "./"+str_bucket_id+"/"+fileName+"["+fmt.Sprintf("%d", indx)+"--1]", "./"+str_bucket_id+"/"+fileName)
 		}
 
 		var out bytes.Buffer
