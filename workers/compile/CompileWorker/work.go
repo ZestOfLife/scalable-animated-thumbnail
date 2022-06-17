@@ -111,6 +111,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
 			client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
+			client2.LPop(cntx, str_bucket_id+"-"+job.VideoName+"-done")
 			continue
 		}
 		getList, _ := client2.Sort(cntx, str_bucket_id+"-"+job.VideoName+"-done", &redis.Sort{}).Result()
@@ -144,17 +145,19 @@ func work(client *redis.Client, minioClient *minio.Client) {
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
 			client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
+			client2.LPop(cntx, str_bucket_id+"-"+job.VideoName+"-done")
 			continue
 		}
 
-		if len(getList) == job.ExpectedFrames {
-			err6 := uploader(minioClient, job.BucketID, job.FileName)
+		if len(getList) >= job.ExpectedFrames {
+			err6 := uploader(minioClient, job.BucketID, fileName)
 			if err6 != nil {
 				log.Println("Error 6:")
 				log.Println(err6)
 				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 				client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
 				client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
+				client2.LPop(cntx, str_bucket_id+"-"+job.VideoName+"-done")
 				continue
 			}
 		}
