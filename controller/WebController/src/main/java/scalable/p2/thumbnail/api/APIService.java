@@ -10,6 +10,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.google.gson.Gson;
+import scalable.p2.thumbnail.exceptions.InvalidCommandRequest;
 import scalable.p2.thumbnail.repository.Status;
 import scalable.p2.thumbnail.repository.StatusRepository;
 import scalable.p2.thumbnail.statuses.Statuses;
@@ -35,7 +36,7 @@ public class APIService {
         return new StringEntity(gson.toJson(job));
     }
 
-    public void queue(Integer BucketID, String VideoName, Integer Duration, Integer FPS) throws IOException {
+    public void queue(Integer BucketID, String VideoName, Integer Duration, Integer FPS) throws Exception {
 
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpPost post = new HttpPost("event-store:8080");
@@ -54,6 +55,7 @@ public class APIService {
         post.setEntity(buildRequest(job));
         post.setHeader("Content-type", "application/json");
         HttpResponse response = httpClient.execute(post);
+        if (response.getStatusLine().getStatusCode() != 200) throw new InvalidCommandRequest(response.toString());
     }
 
     public Map<String, Integer> getStatus(Integer BucketID, String VideoName, Statuses state) {

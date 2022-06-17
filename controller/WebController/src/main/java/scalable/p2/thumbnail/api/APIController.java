@@ -26,7 +26,7 @@ public class APIController {
         for (Video v : list) {
             try {
                 this.service.queue(payload.getBucketID(), v.getVideoName(), v.getDuration(), v.getFPS());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 ResponseEntity.badRequest();
             }
         }
