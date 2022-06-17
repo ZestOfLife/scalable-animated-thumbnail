@@ -1,4 +1,4 @@
-name: Build Web Controller Projection Image
+name: Build Web Controller Image
 
 on:
   workflow_dispatch:
