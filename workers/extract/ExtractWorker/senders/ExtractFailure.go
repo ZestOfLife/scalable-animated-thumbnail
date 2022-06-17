@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -15,6 +16,7 @@ func ExtractFailure(BucketID int, VideoName string, FileName string, Timestamp f
 
 	resp, err := http.Post("event-store:8080/reportextractfailure", "application/json", responseBody)
 	if err != nil {
+		log.Println(err)
 		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "event-store:8080/reportextractfailure"})
 		return
 	}
@@ -22,6 +24,7 @@ func ExtractFailure(BucketID int, VideoName string, FileName string, Timestamp f
 
 	_, err2 := ioutil.ReadAll(resp.Body)
 	if err2 != nil {
+		log.Println(err2)
 		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "event-store:8080/reportextractfailure"})
 		return
 	}

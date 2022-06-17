@@ -40,12 +40,14 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
 		err3 := os.MkdirAll(path, os.ModePerm)
 		if err3 != nil {
+			log.Println(err3)
 			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
 		}
 
 		err4 := downloader(minioClient, job.BucketID, job.VideoName, job.FileName)
 		if err4 != nil {
+			log.Println(err4)
 			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
 		}
@@ -53,12 +55,14 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		cmd := exec.Command("mogrify", path+"/"+job.FileName, "-resize", "720x540", path+"/"+job.FileName)
 		err5 := cmd.Run()
 		if err5 != nil {
+			log.Println(err5)
 			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
 		}
 
 		err6 := uploader(minioClient, job.BucketID, job.VideoName, job.FileName)
 		if err6 != nil {
+			log.Println(err6)
 			go senders.ResizeFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
 		}
