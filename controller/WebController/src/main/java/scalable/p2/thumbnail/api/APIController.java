@@ -21,7 +21,7 @@ public class APIController {
 
     @RequestMapping(value = "/api/submit", method = RequestMethod.POST)
     public void submitJob(@RequestBody Pojo payload) {
-        Video[] list = payload.getVideos();
+        List<Video> list = payload.getVideos();
 
         for (Video v : list) {
             try {

@@ -3,11 +3,13 @@ package scalable.p2.thumbnail.api;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 public class Pojo {
     private Integer BucketID;
-    private Video[] Videos;
+    private List<Video> Videos;
 }
 
 @Setter
