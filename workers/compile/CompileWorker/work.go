@@ -150,6 +150,26 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		}
 
 		if len(getList) >= job.ExpectedFrames {
+			loopcmd := exec.Command("convert", "-loop", "0", "./"+str_bucket_id+"/"+fileName, "./"+str_bucket_id+"/"+fileName)
+
+			var out2 bytes.Buffer
+			var stderr2 bytes.Buffer
+			loopcmd.Stdout = &out2
+			loopcmd.Stderr = &stderr2
+			errL := loopcmd.Run()
+
+			if errL != nil {
+				log.Println("Error L:")
+				log.Println(errL)
+				log.Println(out2.String())
+				log.Println(stderr2.String())
+				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
+				client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
+				client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
+				client2.LPop(cntx, str_bucket_id+"-"+job.VideoName+"-done")
+				continue
+			}
+
 			err6 := uploader(minioClient, job.BucketID, fileName)
 			if err6 != nil {
 				log.Println("Error 6:")
