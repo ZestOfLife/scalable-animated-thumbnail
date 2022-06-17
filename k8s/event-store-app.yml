@@ -1,15 +1,20 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: event-store-svc
+  name: event-store
   labels:
-    app: event-store-svc
+    app: event-store
 spec:
   ports:
-  - port: 6379
+  - name: redis
+    port: 6379
     targetPort: 6379
+  - name: http 
+    port: 8080
+    targetPort: 8080
   selector:
-    app: event-store-svc
+    app: event-store
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -18,24 +23,31 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: event-store-svc
+      app: event-store
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: event-store-svc
+        app: event-store
     spec:
       containers:
       - image: redis:7.0.0
         name: redis
         ports:
         - containerPort: 6379
-          name: event-store-app
+          name: redis
         volumeMounts:
         - name: event-store-volume
           mountPath: "/redis-master-data"
+      - image: ghcr.io/cs-muic/scalable-p2-scalable-t3-dartrix/command-handler:latest
+        name: command-handler
+        ports:
+        - containerPort: 8080
+          name: http
       volumes:
       - name: event-store-volume
         persistentVolumeClaim:
           claimName: event-store-pv-claim
+      imagePullSecrets:
+      - name: secret
