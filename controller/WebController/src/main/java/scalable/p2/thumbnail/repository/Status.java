@@ -13,6 +13,7 @@ import java.util.Date;
 @Builder
 @Setter
 @Getter
+@IdClass(StatusID.class)
 public class Status implements Serializable {
     @Id
     @Column(name = "bucket_id")
