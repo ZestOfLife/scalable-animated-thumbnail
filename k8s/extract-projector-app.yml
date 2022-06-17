@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: extract-projector
+  labels:
+    app: extract-projector
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: extract-projector
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extract-projector-deployment
+spec:
+  selector:
+    matchLabels:
+      app: extract-projector
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: extract-projector
+    spec:
+      containers:
+      - image: redis:7.0.0
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: extract-project
+      - image: ghcr.io/cs-muic/scalable-p2-scalable-t3-dartrix/extract-projection:latest
+        name: extract-projector
+      imagePullSecrets:
+      - name: secret

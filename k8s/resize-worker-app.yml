@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resize-worker-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: resize-worker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: resize-worker
+    spec:
+      containers:
+      - image: ghcr.io/cs-muic/scalable-p2-scalable-t3-dartrix/resize-worker:latest
+        name: resize-worker
+      imagePullSecrets:
+      - name: secret

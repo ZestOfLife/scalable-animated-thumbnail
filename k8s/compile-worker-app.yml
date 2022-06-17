@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compile-worker-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compile-worker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: compile-worker
+    spec:
+      containers:
+      - image: ghcr.io/cs-muic/scalable-p2-scalable-t3-dartrix/compile-worker:latest
+        name: compile-worker
+        volumeMounts:
+        - name: compile-worker-share
+          mountPath: "/app"
+      volumes:
+      - name: compile-worker-share
+        persistentVolumeClaim:
+          claimName: compile-worker-share-claim
+      imagePullSecrets:
+      - name: secret
