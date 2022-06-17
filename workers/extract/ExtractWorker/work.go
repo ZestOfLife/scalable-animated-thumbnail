@@ -56,7 +56,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		timeAt := fmt.Sprintf("'%v", job.Timestamp) + "ms'"
 
-		cmd := exec.Command("ffmpeg", "-ss", timeAt, "-i", path, "-frames:v", "1", "-q:v", "2", path+"/"+job.FileName)
+		cmd := exec.Command("ffmpeg", "-ss", timeAt, "-i", path+"/"+job.VideoName, "-frames:v", "1", "-q:v", "2", path+"/"+job.FileName)
 		err5 := cmd.Run()
 		if err5 != nil {
 			log.Println("Error 5:")

@@ -19,6 +19,6 @@ func downloader(minioClient *minio.Client, BucketID int, VideoName string) error
 	cntx := context.Background()
 	filePath := fmt.Sprintf("%v/%v", fmt.Sprintf("%d", BucketID), VideoName)
 
-	err := minioClient.FGetObject(cntx, "videos", filePath, "./"+filePath, minio.GetObjectOptions{})
+	err := minioClient.FGetObject(cntx, "videos", filePath, "./"+filePath+"/"+VideoName, minio.GetObjectOptions{})
 	return err
 }
