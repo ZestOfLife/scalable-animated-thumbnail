@@ -11,7 +11,8 @@ import java.util.List;
 @Repository
 public interface StatusRepository extends JpaRepository<Status, Integer> {
 
-    Status getByBucketIDAndVideoName(Integer BucketID, String VideoName);
+    @Query("select t from Status t where t.BucketID = :id and t.VideoName = :id2")
+    Status getByBucketIDAndVideoName(@Param("id") Integer BucketID, @Param("id2") String VideoName);
 
     @Query("select t from Status t where t.BucketID = :id and t.Compiled = t.ExpectedFrames")
     List<Status> getCompletedGifs(@Param("id") Integer BucketID);
