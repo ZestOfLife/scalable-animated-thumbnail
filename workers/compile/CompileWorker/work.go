@@ -96,7 +96,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		str_bucket_id := fmt.Sprintf("%d", job.BucketID)
 
 		_, not_found := client2.Get(cntx, str_bucket_id+"-"+job.VideoName).Result()
-		if not_found == redis.Nil {
+		if not_found != redis.Nil {
 			client2.BRPop(cntx, 0, str_bucket_id+"-"+job.VideoName+"-wait").Result()
 		} else if not_found != nil {
 			log.Panic(not_found)
