@@ -132,11 +132,11 @@ func work(client *redis.Client, minioClient *minio.Client) {
 			exec.Command("convert", "'./"+str_bucket_id+"/"+fileName+"[0"+fmt.Sprintf("%d", indx-1)+"]'", "./"+str_bucket_id+"/"+job.VideoName+"/"+job.FileName, "'./"+str_bucket_id+"/"+fileName+"["+fmt.Sprintf("%d", indx)+"--1]'", "./"+str_bucket_id+"/"+fileName)
 		}
 
-		err5 := cmd.Run()
 		var out bytes.Buffer
 		var stderr bytes.Buffer
 		cmd.Stdout = &out
 		cmd.Stderr = &stderr
+		err5 := cmd.Run()
 
 		if err5 != nil {
 			log.Println("Error 5:")

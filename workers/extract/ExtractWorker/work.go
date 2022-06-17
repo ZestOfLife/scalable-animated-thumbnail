@@ -53,15 +53,16 @@ func work(client *redis.Client, minioClient *minio.Client) {
 			go senders.ExtractFailure(job.BucketID, job.VideoName, job.FileName, job.Timestamp, job.ExpectedFrames)
 			continue
 		}
+		defer os.Remove(path + "/" + job.VideoName)
 
 		timeAt := fmt.Sprintf("'%v", job.Timestamp) + "ms'"
 
 		cmd := exec.Command("ffmpeg", "-ss", timeAt, "-i", path+"/"+job.VideoName, "-frames:v", "1", "-q:v", "2", path+"/"+job.FileName)
-		err5 := cmd.Run()
 		var out bytes.Buffer
 		var stderr bytes.Buffer
 		cmd.Stdout = &out
 		cmd.Stderr = &stderr
+		err5 := cmd.Run()
 		if err5 != nil {
 			log.Println("Error 5:")
 			log.Println(err5)

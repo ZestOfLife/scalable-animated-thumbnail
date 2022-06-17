@@ -55,12 +55,11 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		}
 
 		cmd := exec.Command("mogrify", path+"/"+job.FileName, "-resize", "720x540", path+"/"+job.FileName)
-		err5 := cmd.Run()
 		var out bytes.Buffer
 		var stderr bytes.Buffer
 		cmd.Stdout = &out
 		cmd.Stderr = &stderr
-
+		err5 := cmd.Run()
 		if err5 != nil {
 			log.Println("Error 5:")
 			log.Println(err5)
