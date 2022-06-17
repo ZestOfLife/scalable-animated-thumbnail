@@ -14,10 +14,10 @@ func CompileFailure(BucketID int, VideoName string, FileName string, ExpectedFra
 	postBody, _ := json.Marshal(commands.LogCompileFailure{BucketID: BucketID, VideoName: VideoName, FileName: FileName, ExpectedFrames: ExpectedFrames})
 	responseBody := bytes.NewBuffer(postBody)
 
-	resp, err := http.Post("event-store:8080/reportcompilefailure", "application/json", responseBody)
+	resp, err := http.Post("http://event-store:8080/reportcompilefailure", "application/json", responseBody)
 	if err != nil {
 		log.Println(err)
-		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "event-store:8080/reportcompilefailure"})
+		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "http://event-store:8080/reportcompilefailure"})
 		return
 	}
 	defer resp.Body.Close()
@@ -25,7 +25,7 @@ func CompileFailure(BucketID int, VideoName string, FileName string, ExpectedFra
 	_, err2 := ioutil.ReadAll(resp.Body)
 	if err2 != nil {
 		log.Println(err2)
-		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "event-store:8080/reportcompilefailure"})
+		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "http://event-store:8080/reportcompilefailure"})
 		return
 	}
 }

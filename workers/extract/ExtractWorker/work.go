@@ -40,6 +40,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
 		err3 := os.MkdirAll(path, os.ModePerm)
 		if err3 != nil {
+			log.Println("Error 3:")
 			log.Println(err3)
 			go senders.ExtractFailure(job.BucketID, job.VideoName, job.FileName, job.Timestamp, job.ExpectedFrames)
 			continue
@@ -47,6 +48,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		err4 := downloader(minioClient, job.BucketID, job.VideoName)
 		if err4 != nil {
+			log.Println("Error 4:")
 			log.Println(err4)
 			go senders.ExtractFailure(job.BucketID, job.VideoName, job.FileName, job.Timestamp, job.ExpectedFrames)
 			continue
@@ -57,6 +59,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		cmd := exec.Command("ffmpeg", "-ss", timeAt, "-i", path, "-frames:v", "1", "-q:v", "2", path+"/"+job.FileName)
 		err5 := cmd.Run()
 		if err5 != nil {
+			log.Println("Error 5:")
 			log.Println(err5)
 			go senders.ExtractFailure(job.BucketID, job.VideoName, job.FileName, job.Timestamp, job.ExpectedFrames)
 			continue
@@ -64,6 +67,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		err6 := uploader(minioClient, job.BucketID, job.VideoName, job.FileName)
 		if err6 != nil {
+			log.Println("Error 6:")
 			log.Println(err6)
 			go senders.ExtractFailure(job.BucketID, job.VideoName, job.FileName, job.Timestamp, job.ExpectedFrames)
 			continue

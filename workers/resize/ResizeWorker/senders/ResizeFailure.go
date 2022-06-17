@@ -14,10 +14,10 @@ func ResizeFailure(BucketID int, VideoName string, FileName string, ExpectedFram
 	postBody, _ := json.Marshal(commands.LogResizeFailure{BucketID: BucketID, VideoName: VideoName, FileName: FileName, ExpectedFrames: ExpectedFrames})
 	responseBody := bytes.NewBuffer(postBody)
 
-	resp, err := http.Post("event-store:8080/reportresizefailure", "application/json", responseBody)
+	resp, err := http.Post("http://event-store:8080/reportresizefailure", "application/json", responseBody)
 	if err != nil {
 		log.Println(err)
-		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "event-store:8080/reportresizefailure"})
+		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "http://event-store:8080/reportresizefailure"})
 		return
 	}
 	defer resp.Body.Close()
@@ -25,7 +25,7 @@ func ResizeFailure(BucketID int, VideoName string, FileName string, ExpectedFram
 	_, err2 := ioutil.ReadAll(resp.Body)
 	if err2 != nil {
 		log.Println(err2)
-		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "event-store:8080/reportresizefailure"})
+		queue.PushDeadQueue(queue.DeadType{Message: postBody, URI: "http://event-store:8080/reportresizefailure"})
 		return
 	}
 }

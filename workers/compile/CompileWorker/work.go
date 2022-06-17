@@ -78,6 +78,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		path := filepath.Join(".", fmt.Sprintf("%d", job.BucketID), job.VideoName)
 		err3 := os.MkdirAll(path, os.ModePerm)
 		if err3 != nil {
+			log.Println("Error 3:")
 			log.Println(err3)
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
@@ -85,6 +86,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		err4 := downloader(minioClient, job.BucketID, job.VideoName, job.FileName)
 		if err4 != nil {
+			log.Println("Error 4:")
 			log.Println(err4)
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			continue
@@ -105,6 +107,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		errr := client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-done", val).Err()
 		if errr != nil {
+			log.Println("Errorerrr:")
 			log.Println(errr)
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
@@ -130,6 +133,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 
 		err5 := cmd.Run()
 		if err5 != nil {
+			log.Println("Error 5:")
 			log.Println(err5)
 			go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 			client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
@@ -140,7 +144,8 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		if len(getList) == job.ExpectedFrames {
 			err6 := uploader(minioClient, job.BucketID, job.FileName)
 			if err6 != nil {
-			log.Println(err6)
+				log.Println("Error 6:")
+				log.Println(err6)
 				go senders.CompileFailure(job.BucketID, job.VideoName, job.FileName, job.ExpectedFrames)
 				client2.Del(cntx, str_bucket_id+"-"+job.VideoName)
 				client2.LPush(cntx, str_bucket_id+"-"+job.VideoName+"-wait", 1)
