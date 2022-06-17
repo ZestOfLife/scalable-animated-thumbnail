@@ -55,7 +55,7 @@ func work(client *redis.Client, minioClient *minio.Client) {
 		}
 		defer os.Remove(path + "/" + job.VideoName)
 
-		timeAt := fmt.Sprintf("'%v", job.Timestamp) + "ms'"
+		timeAt := fmt.Sprintf("%v", job.Timestamp) + "ms"
 
 		cmd := exec.Command("ffmpeg", "-ss", timeAt, "-i", path+"/"+job.VideoName, "-frames:v", "1", "-q:v", "2", path+"/"+job.FileName)
 		var out bytes.Buffer
