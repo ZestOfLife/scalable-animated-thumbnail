@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extract-worker-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: extract-worker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: extract-worker
+    spec:
+      containers:
+      - image: ghcr.io/cs-muic/scalable-p2-scalable-t3-dartrix/extract-worker:latest
+        name: extract-worker
+      imagePullSecrets:
+      - name: secret
